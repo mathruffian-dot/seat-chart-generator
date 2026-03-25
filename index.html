@@ -2,201 +2,86 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>班級座位表產生器</title>
     <!-- 引入 PDF 產生器函式庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* --- 基本樣式：固定 Full HD 1920×1080 --- */
+        * { box-sizing: border-box; }
+
         html, body {
             margin: 0;
             padding: 0;
-            width: 1920px;
-            height: 1080px;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
             background-color: #f4f7f6;
-            box-sizing: border-box;
         }
 
         /* 列印/PDF 產生時隱藏不必要的元素 */
         body.printing .seat-controls,
         body.printing .controls,
-        body.printing .teacher-desk + h1 {
+        body.printing .classroom-title {
             display: none !important;
         }
 
-        /* --- 主要容器：填滿整個 Full HD 畫面 --- */
+        /* ===== 主容器：垂直排列 ===== */
         .container {
             display: flex;
-            gap: 30px;
-            width: 1920px;
-            height: 1080px;
-            padding: 20px 30px;
-            box-sizing: border-box;
-        }
-
-        /* --- 左側控制面板 --- */
-        .controls {
-            width: 420px;
-            min-width: 420px;
-            max-width: 420px;
-            padding: 18px 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 2.2rem;
-            margin: 0 0 10px 0;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-            font-size: 1.6rem;
-            margin: 0 0 8px 0;
-        }
-
-        /* --- 使用說明區塊 --- */
-        .instructions {
-            margin-top: 5px;
-            margin-bottom: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px 12px;
-            background-color: #f9f9f9;
-        }
-        .instructions summary {
-            cursor: pointer;
-            font-weight: bold;
-            padding: 8px 0;
-            color: #0056b3;
-            font-size: 16px;
-        }
-        .instructions ol {
-            padding-left: 22px;
-            line-height: 1.7;
-            font-size: 14px;
-            margin-top: 5px;
-            margin-bottom: 8px;
-        }
-        .instructions ul {
-            padding-left: 18px;
-            margin-top: 4px;
-        }
-        .instructions .btn-example {
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 13px;
-            border: 1px solid #ccc;
-            display: inline-block;
-        }
-        .instructions .included { color: #155724; background-color: #d4edda; }
-        .instructions .excluded { color: #721c24; background-color: #f8d7da; }
-
-        .student-inputs {
-            display: flex;
-            gap: 12px;
             width: 100%;
-            flex: 1;
-            min-height: 0;
-        }
-        .input-group {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-        .input-group label {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 4px;
-            color: #555;
-            font-size: 16px;
-        }
-        .input-group textarea {
-            flex: 1;
-            min-height: 120px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            padding: 8px;
-            font-size: 16px;
-            resize: none;
+            height: 100vh;
         }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            flex-shrink: 0;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #exportPdfBtn {
-            background-color: #28a745;
-        }
-        #exportPdfBtn:hover {
-            background-color: #218838;
-        }
-        button:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        /* --- 右側教室區 --- */
+        /* ===== 上方：座位表區（佔滿剩餘空間）===== */
         .classroom {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 0;
-            box-sizing: border-box;
+            padding: 12px 24px 8px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .classroom-title {
+            font-size: 1.6rem;
+            color: #333;
+            margin: 0 0 8px 0;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
         .teacher-desk {
-            width: 220px;
-            height: 60px;
+            width: 200px;
+            height: 48px;
             background-color: #6c757d;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 20px;
+            margin-bottom: 14px;
+            font-size: 18px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             border: 3px solid #5a6268;
             flex-shrink: 0;
         }
 
-        /* --- 座位表網格系統 --- */
+        /* 座位表網格 */
         .seating-chart {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 14px;
+            gap: 10px;
             width: 100%;
             flex: 1;
             min-height: 0;
             align-content: start;
         }
 
-        /* --- 座位樣式 --- */
+        /* 座位樣式 */
         .seat {
             position: relative;
             background-color: #fff;
@@ -214,11 +99,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
-            padding: 10px 4px 8px;
+            font-size: clamp(12px, 1.4vw, 20px);
+            padding: 8px 4px 6px;
             text-align: center;
             word-break: break-all;
-            min-height: 50px;
+            min-height: 40px;
             cursor: move;
             font-weight: bold;
         }
@@ -232,15 +117,15 @@
             transform: scale(0.95);
         }
 
-        /* --- 座位控制按鈕 --- */
+        /* 座位控制按鈕 */
         .seat-controls {
             display: flex;
             background-color: #f0f0f0;
         }
         .seat-btn {
             flex: 1;
-            padding: 4px;
-            font-size: 13px;
+            padding: 3px;
+            font-size: 11px;
             border: none;
             border-bottom: 1px solid #ddd;
             cursor: pointer;
@@ -249,56 +134,196 @@
             width: auto;
             margin: 0;
         }
-        .seat-btn:hover {
-            background-color: #e0e0e0;
-        }
-        .seat-btn:first-child {
-            border-right: 1px solid #ddd;
-        }
-        .toggle-include.excluded {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .toggle-include.included {
-            background-color: #d4edda;
-            color: #155724;
-        }
+        .seat-btn:hover { background-color: #e0e0e0; }
+        .seat-btn:first-child { border-right: 1px solid #ddd; }
+        .toggle-include.excluded { background-color: #f8d7da; color: #721c24; }
+        .toggle-include.included { background-color: #d4edda; color: #155724; }
         .toggle-gender.pref-male { color: #004085; background-color: #cce5ff; }
         .toggle-gender.pref-female { color: #721c24; background-color: #f8d7da; }
 
-        /* --- 座位狀態樣式 --- */
-        .seat.is-excluded {
-            opacity: 0.5;
-            background-color: #e9ecef;
-            border-style: dashed;
-        }
+        /* 座位狀態 */
+        .seat.is-excluded { opacity: 0.5; background-color: #e9ecef; border-style: dashed; }
         .seat.student-male { background-color: #cce5ff; }
         .seat.student-female { background-color: #f8d7da; }
         .seat.empty { background-color: #f8f9fa; }
+
+
+        /* ===== 下方：控制面板 ===== */
+        .controls {
+            display: flex;
+            flex-direction: row;
+            gap: 14px;
+            align-items: stretch;
+            padding: 10px 20px;
+            background-color: #fff;
+            border-top: 2px solid #dee2e6;
+            box-shadow: 0 -3px 12px rgba(0,0,0,0.08);
+            height: 220px;
+            min-height: 220px;
+            flex-shrink: 0;
+        }
+
+        /* 使用說明區塊 */
+        .instructions-wrapper {
+            width: 260px;
+            min-width: 220px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        .instructions {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px 10px;
+            background-color: #f9f9f9;
+            font-size: 13px;
+            height: 100%;
+        }
+        .instructions summary {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 6px 0;
+            color: #0056b3;
+            font-size: 14px;
+        }
+        .instructions ol {
+            padding-left: 18px;
+            line-height: 1.7;
+            margin: 4px 0 6px;
+        }
+        .instructions ul {
+            padding-left: 14px;
+            margin-top: 2px;
+        }
+        .instructions .btn-example {
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            display: inline-block;
+        }
+        .instructions .included { color: #155724; background-color: #d4edda; }
+        .instructions .excluded { color: #721c24; background-color: #f8d7da; }
+
+        /* 分隔線 */
+        .divider {
+            width: 1px;
+            background-color: #dee2e6;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+
+        /* 學生名單輸入 */
+        .student-inputs {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .input-group label {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+        .input-group textarea {
+            flex: 1;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            font-size: 14px;
+            resize: none;
+            min-height: 0;
+        }
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+        }
+
+        /* 操作按鈕 */
+        .buttons-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            width: 140px;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        .buttons-panel button {
+            width: 100%;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            color: white;
+        }
+        .buttons-panel button:hover { transform: translateY(-1px); }
+        .buttons-panel button:active { transform: translateY(0); }
+        #assignSeatsBtn {
+            background-color: #007bff;
+        }
+        #assignSeatsBtn:hover { background-color: #0056b3; }
+        #exportPdfBtn {
+            background-color: #28a745;
+        }
+        #exportPdfBtn:hover { background-color: #218838; }
+        .buttons-panel button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 左側：學生名單輸入與控制按鈕 -->
+
+    <!-- ===== 上方：座位表區 ===== -->
+    <div class="classroom">
+        <h1 class="classroom-title">座位表</h1>
+        <div class="teacher-desk">講 桌</div>
+        <div class="seating-chart" id="seatingChart">
+            <!-- 座位將由 JavaScript 自動生成 -->
+        </div>
+    </div>
+
+    <!-- ===== 下方：控制面板 ===== -->
     <div class="controls">
-        <h2>學生名單</h2>
-        <details class="instructions">
-            <summary>點此展開/收合使用說明</summary>
-            <ol>
-                <li><strong>輸入名單：</strong> 在「男學生」與「女學生」欄位中，每行輸入一位學生姓名。</li>
-                <li><strong>座位設定：</strong>
-                    <ul>
-                        <li>已啟用<strong>梅花座</strong>，男女交錯排列，性別已固定。</li>
-                        <li>點擊座位上方的<span class="btn-example included">納入</span>/<span class="btn-example excluded">排除</span>按鈕，可決定該座位是否參與自動分配。</li>
-                        <li>座位 25、26、31、32 已固定停用。</li>
-                    </ul>
-                </li>
-                <li><strong>自動排座：</strong> 點擊「自動排座位」按鈕，系統將根據您的設定智慧安排座位。</li>
-                <li><strong>手動微調：</strong> 直接用滑鼠拖曳座位上的學生姓名，即可與其他座位互換。</li>
-                <li><strong>匯出存檔：</strong> 點擊「匯出 PDF」，會產出包含「學生視角」與「教師視角」的兩頁 PDF。</li>
-            </ol>
-        </details>
-        <p style="font-size:13px; color:#666; text-align:center; margin: 4px 0;">請分別輸入男女學生姓名</p>
+
+        <!-- 使用說明 -->
+        <div class="instructions-wrapper">
+            <details class="instructions">
+                <summary>📋 點此展開使用說明</summary>
+                <ol>
+                    <li><strong>輸入名單：</strong>在「男學生」與「女學生」欄位中，每行輸入一位學生姓名。</li>
+                    <li><strong>座位設定：</strong>
+                        <ul>
+                            <li>已啟用<strong>梅花座</strong>，男女交錯排列。</li>
+                            <li>點擊座位的<span class="btn-example included">納入</span>/<span class="btn-example excluded">排除</span>按鈕，可控制是否參與分配。</li>
+                            <li>座位 25、26、31、32 已固定停用。</li>
+                        </ul>
+                    </li>
+                    <li><strong>自動排座：</strong>點擊「排座位」按鈕。</li>
+                    <li><strong>手動微調：</strong>直接拖曳座位上的姓名互換。</li>
+                    <li><strong>匯出存檔：</strong>點擊「匯出 PDF」產出雙視角 PDF。</li>
+                </ol>
+            </details>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 學生名單輸入 -->
         <div class="student-inputs">
             <div class="input-group">
                 <label for="maleStudentNames">男學生</label>
@@ -339,18 +364,18 @@
 蘇苡瑄</textarea>
             </div>
         </div>
-        <button id="assignSeatsBtn">自動排座位</button>
-        <button id="exportPdfBtn">匯出 PDF</button>
-    </div>
-    <!-- 右側：教室與座位表 -->
-    <div class="classroom">
-        <h1>座位表</h1>
-        <div class="teacher-desk">講 桌</div>
-        <div class="seating-chart" id="seatingChart">
-            <!-- 座位將由 JavaScript 自動生成於此 -->
+
+        <div class="divider"></div>
+
+        <!-- 操作按鈕 -->
+        <div class="buttons-panel">
+            <button id="assignSeatsBtn">🎲 排座位</button>
+            <button id="exportPdfBtn">📄 匯出 PDF</button>
         </div>
+
     </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const seatingChart = document.getElementById('seatingChart');
@@ -363,10 +388,11 @@
         const fixedExcludedSeats = [25, 26, 31, 32];
         // 性別覆蓋：指定特定座位的性別（覆蓋梅花座規則）
         const genderOverrides = { 20: 'male' };
+
         function createSeats() {
             seatingChart.innerHTML = '';
             let seatCounter = 0;
-            layout.forEach((seatsInRow, rowIndex) => {
+            layout.forEach((seatsInRow) => {
                 for (let i = 0; i < seatsInRow; i++) {
                     seatingChart.appendChild(createSingleSeat(seatCounter++));
                 }
@@ -381,9 +407,6 @@
             seat.id = `seat-${index}`;
             seat.dataset.studentGender = 'none';
 
-            // 梅花座：根據行列計算性別偏好
-            // 座位6 (row=0, col=5) 為男生 → (row+col)奇數=男，偶數=女
-            // genderOverrides 可覆蓋個別座位
             const row = Math.floor(index / 6);
             const col = index % 6;
             const isMaleSeat = genderOverrides[seatNumber]
@@ -392,7 +415,6 @@
             const genderPref = isMaleSeat ? 'male' : 'female';
             seat.dataset.genderPref = genderPref;
 
-            // 固定排除的座位：預設排除且鎖定
             if (isFixedExcluded) {
                 seat.dataset.included = 'false';
                 seat.dataset.fixedExcluded = 'true';
@@ -417,7 +439,6 @@
                 includeBtn.onclick = () => toggleInclusion(seat, includeBtn);
             }
 
-            // 性別按鈕：梅花座固定，不可切換
             const genderBtn = document.createElement('button');
             if (isMaleSeat) {
                 genderBtn.className = 'seat-btn toggle-gender pref-male';
@@ -441,6 +462,7 @@
             seat.appendChild(content);
             return seat;
         }
+
         function toggleInclusion(seat, btn) {
             const isIncluded = seat.dataset.included === 'true';
             if (isIncluded) {
@@ -455,7 +477,9 @@
                 btn.className = 'seat-btn toggle-include included';
             }
         }
+
         createSeats();
+
         assignSeatsBtn.addEventListener('click', function() {
             let maleNames = maleStudentNamesTextarea.value.trim().split('\n').filter(name => name.trim() !== '');
             let femaleNames = femaleStudentNamesTextarea.value.trim().split('\n').filter(name => name.trim() !== '');
@@ -464,13 +488,13 @@
             const allSeats = Array.from(document.querySelectorAll('.seat'));
 
             allSeats.forEach(seat => {
-                // 固定停用的座位不清除
                 if (seat.dataset.fixedExcluded === 'true') return;
                 seat.querySelector('.seat-content').textContent = '';
                 seat.className = `seat`;
                 seat.classList.add('empty');
-                if(seat.dataset.included === 'false') seat.classList.add('is-excluded');
+                if (seat.dataset.included === 'false') seat.classList.add('is-excluded');
             });
+
             const includedSeats = allSeats.filter(s => s.dataset.included === 'true');
             const malePrefSeats = includedSeats.filter(s => s.dataset.genderPref === 'male');
             const femalePrefSeats = includedSeats.filter(s => s.dataset.genderPref === 'female');
@@ -481,8 +505,10 @@
                 seat.classList.remove('empty');
                 seat.classList.add(gender === 'male' ? 'student-male' : 'student-female');
             };
+
             while (maleNames.length > 0 && malePrefSeats.length > 0) assign(maleNames.pop(), 'male', malePrefSeats.pop());
             while (femaleNames.length > 0 && femalePrefSeats.length > 0) assign(femaleNames.pop(), 'female', femalePrefSeats.pop());
+
             let remainingStudents = [
                 ...maleNames.map(name => ({ name, gender: 'male' })),
                 ...femaleNames.map(name => ({ name, gender: 'female' }))
@@ -493,34 +519,36 @@
                 const student = remainingStudents.pop();
                 assign(student.name, student.gender, remainingSeats.pop());
             }
+
             allSeats.filter(s => s.dataset.fixedExcluded !== 'true' && s.querySelector('.seat-content').textContent === '').forEach(s => {
                 s.querySelector('.seat-content').textContent = '空位';
             });
         });
+
         // --- 匯出 PDF 功能 ---
         exportPdfBtn.addEventListener('click', async function() {
             const classroomElement = document.querySelector('.classroom');
             const originalButtonText = exportPdfBtn.textContent;
-            exportPdfBtn.textContent = '正在產生 PDF...';
+            exportPdfBtn.textContent = '產生中...';
             exportPdfBtn.disabled = true;
             let flippedClassroom = null;
             try {
                 document.body.classList.add('printing');
-                // --- 步驟 1: 擷取學生視角 ---
+                // 步驟 1: 擷取學生視角
                 const studentCanvas = await html2canvas(classroomElement, { scale: 2 });
-                // --- 步驟 2: 準備並擷取教師視角 ---
+                // 步驟 2: 準備教師視角（旋轉180度）
                 flippedClassroom = classroomElement.cloneNode(true);
                 flippedClassroom.style.width = `${classroomElement.offsetWidth}px`;
                 flippedClassroom.style.position = 'absolute';
                 flippedClassroom.style.left = '-9999px';
                 flippedClassroom.style.top = '0px';
                 flippedClassroom.style.transform = 'rotate(180deg)';
-                flippedClassroom.querySelectorAll('.seat-content, .teacher-desk, h1').forEach(el => {
+                flippedClassroom.querySelectorAll('.seat-content, .teacher-desk, .classroom-title').forEach(el => {
                     el.style.transform = 'rotate(180deg)';
                 });
                 document.body.appendChild(flippedClassroom);
                 const teacherCanvas = await html2canvas(flippedClassroom, { scale: 2 });
-                // --- 步驟 3: 組合 PDF ---
+                // 步驟 3: 組合 PDF
                 const studentViewImg = studentCanvas.toDataURL('image/png');
                 const teacherViewImg = teacherCanvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
@@ -549,13 +577,12 @@
                 alert("無法產生 PDF，請檢查瀏覽器主控台的錯誤訊息。");
             } finally {
                 document.body.classList.remove('printing');
-                if (flippedClassroom) {
-                    flippedClassroom.remove();
-                }
+                if (flippedClassroom) flippedClassroom.remove();
                 exportPdfBtn.textContent = originalButtonText;
                 exportPdfBtn.disabled = false;
             }
         });
+
         // --- 拖拉交換功能 ---
         let draggedItem = null;
         seatingChart.addEventListener('dragstart', function(e) {
@@ -568,7 +595,7 @@
                 } else { e.preventDefault(); }
             } else { e.preventDefault(); }
         });
-        seatingChart.addEventListener('dragend', function(e) {
+        seatingChart.addEventListener('dragend', function() {
             if (draggedItem) {
                 draggedItem.classList.remove('dragging');
                 draggedItem = null;
@@ -590,8 +617,8 @@
                 ['student-male', 'student-female', 'empty'].forEach(c => {
                     const hasC1 = draggedItem.classList.contains(c);
                     const hasC2 = targetSeat.classList.contains(c);
-                    if(hasC1) targetSeat.classList.add(c); else targetSeat.classList.remove(c);
-                    if(hasC2) draggedItem.classList.add(c); else draggedItem.classList.remove(c);
+                    if (hasC1) targetSeat.classList.add(c); else targetSeat.classList.remove(c);
+                    if (hasC2) draggedItem.classList.add(c); else draggedItem.classList.remove(c);
                 });
             }
         });
